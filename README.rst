@@ -5,11 +5,30 @@ PostgreSQL master/slave for dotCloud
 
    This recipe is alpha quality.
 
+
+Basic Setup
+-----------
+
 ::
 
-    git clone
-    dotcloud push myapp postgresql-on-dotcloud.git
-    dotcloud info myapp.db.0 | dotcloud run myapp.db.1 /home/dotcloud/enslave.py
+   git clone git://github.com/jpetazzo/postgresql-on-dotcloud.git
+   dotcloud push myapp postgresql-on-dotcloud
+
+The superuser will be ``dotcloud`` (not ``root`` nor ``postgres``).
+The password will be shown at the end of the build process. You can
+also retrieve it by running::
+
+   dotcloud run myapp.db cat password
+
+
+Master/Slave Setup
+------------------
+
+By default, this recipe deploys a single PostgreSQL master.
+To provision a slave, you need to do this::
+
+   dotcloud scale myapp db=2
+   dotcloud info myapp.db.0 | dotcloud run myapp.db.1 /home/dotcloud/enslave.py
 
 This last line will make myapp.db.1 a slave of myapp.db.0.
 The ``enslave.py`` script will read the ``dotcloud info`` blurb on ``stdin``,
@@ -19,7 +38,26 @@ the master to the slave, complete the backup process, create the replication
 parameters (the ``recovery.conf`` file), and restart the slave ``postgres``
 process.
 
-It should work with multiple slaves without a problem.
+
+Failover
+--------
+
+The failover is not automatic. You must do this::
+
+   dotcloud run myapp.db.1 rm /home/dotcloud/data/recovery.conf
+   dotcloud run myapp.db.1 supervisorctl restart postgres
+
+And then update your app configuration to point to the promoted slave
+instead of the master. You can rerun the "enslave" procedure described
+above at anytime, but remember that the master data will overwrite the
+slave data. Remember to use the correct instance numbers!
+
+
+Multi-Slave Setup
+-----------------
+
+It should work with multiple slaves without a problem. Just provision each
+slave individually.
 
 .. note::
 
@@ -27,4 +65,5 @@ It should work with multiple slaves without a problem.
    If you setup N slaves, if you promote 1 slave to be master, the
    other slaves should be reconfigured to talk to the new master.
    Yes, this could mean a lengthy reprovisioning process.
+
 

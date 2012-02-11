@@ -1,5 +1,4 @@
 db:
-  instances: 2
   type: custom
   buildscript: postgresql/builder
   processes:
