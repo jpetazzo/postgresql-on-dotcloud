@@ -1,0 +1,25 @@
+#!/bin/bash
+set -ex
+cat >>$HOME/profile <<EOF
+export PATH=$HOME/postgresql:$PATH
+export PGDATA=$HOME/data
+export PGPORT=$PORT_PGSQL
+EOF
+. $HOME/profile
+[ -d $PGDATA ] || {
+	mkdir $PGDATA
+	initdb $PGDATA --pwfile=$HOME/password
+	grep -q "^host all" $PGDATA/pg_hba.conf ||
+		cat >>$PGDATA/pg_hba.conf <<EOF
+host all all 0.0.0.0/0 md5
+host replication all 0.0.0.0/0 md5
+EOF
+}
+
+exec postgres \
+	-c port=$PORT_PGSQL \
+	-c listen_addresses='*'	\
+	-c wal_level=hot_standby \
+	-c hot_standby=on \
+	-c max_wal_senders=10
+

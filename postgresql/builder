@@ -1,0 +1,26 @@
+#!/bin/bash
+set -ex
+VERSION=9.1.2
+CODEDIR=$PWD
+BUILDDIR="$(dirname "$0")"
+cp $BUILDDIR/run.postgres $HOME
+cp $BUILDDIR/enslave.py $HOME
+[ -d $HOME/postgresql-$VERSION ] || {
+	curl http://ftp.postgresql.org/pub/source/v$VERSION/postgresql-$VERSION.tar.gz | tar -zxf-
+	cd postgresql-$VERSION
+	./configure --prefix=$HOME/postgresql-$VERSION
+	make install
+}
+rm -f $HOME/postgresql
+ln -s postgresql-$VERSION $HOME/postgresql
+[ -f $HOME/.ssh/id_rsa ] || {
+	ssh-keygen -t rsa -f $HOME/.ssh/id_rsa -N ''
+	cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+}
+cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys # FIXME
+[ -f $HOME/password ] || {
+	head -c8 /dev/random | base64 | tr -d = > $HOME/password
+}
+echo "User: $USER"
+echo "Password: $(cat $HOME/password)"
+
