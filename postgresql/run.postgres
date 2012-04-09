@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 cat >>$HOME/profile <<EOF
-export PATH=$HOME/postgresql:$PATH
+export PATH=$HOME/postgresql:$HOME/postgresql/bin:$PATH
 export PGDATA=$HOME/data
 export PGPORT=$PORT_PGSQL
 EOF
