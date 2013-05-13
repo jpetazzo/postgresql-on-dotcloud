@@ -10,6 +10,10 @@ cp $BUILDDIR/enslave.py $HOME
 	cd postgresql-$VERSION
 	./configure --prefix=$HOME/postgresql-$VERSION
 	make install
+    cd contrib
+    make
+    make install
+
 }
 rm -f $HOME/postgresql
 ln -s postgresql-$VERSION $HOME/postgresql
