@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ex
-VERSION=9.1.2
+VERSION=9.2.4
 CODEDIR=$PWD
 BUILDDIR="$(dirname "$0")"
 cp $BUILDDIR/run.postgres $HOME
@@ -10,6 +10,10 @@ cp $BUILDDIR/enslave.py $HOME
 	cd postgresql-$VERSION
 	./configure --prefix=$HOME/postgresql-$VERSION
 	make install
+    cd contrib
+    make
+    make install
+
 }
 rm -f $HOME/postgresql
 ln -s postgresql-$VERSION $HOME/postgresql
@@ -23,4 +27,3 @@ cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys # FIXME
 }
 echo "User: $USER"
 echo "Password: $(cat $HOME/password)"
-
