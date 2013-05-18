@@ -39,11 +39,12 @@ By default, this recipe deploys a single PostgreSQL master.
 To provision a slave, you need to do this::
 
    dotcloud scale db=2
-   dotcloud info db.0 | dotcloud run db.1 /home/dotcloud/enslave.py
+   dotcloud run db.1 /home/dotcloud/enslave.py 0
 
-This last line will make myapp.db.1 a slave of myapp.db.0.
-The ``enslave.py`` script will read the ``dotcloud info`` blurb on ``stdin``,
-extract the SSH and SQL port information, stop the slave ``postgres`` process,
+This last line will make ``db.1`` a slave of ``db.0``.
+The first argument to the ``enslave.py`` script is the instance number of the
+master. The script will retrieve the SSH and SQL connection parameters from
+the dotCloud environment, stop the slave ``postgres`` process,
 start a backup process on the master, transfer the ``PGDATA`` directory from
 the master to the slave, complete the backup process, create the replication
 parameters (the ``recovery.conf`` file), and restart the slave ``postgres``

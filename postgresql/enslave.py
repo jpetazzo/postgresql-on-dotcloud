@@ -1,12 +1,17 @@
 #!/usr/bin/env python
-# how to run this:
-# dotcloud info myapp.db.MASTERID | dotcloud run myapp.db.SLAVEID enslave.py
-import os, re, sys
-masterinfo = sys.stdin.read()
+# How to run this: dotcloud run db.SLAVEID enslave MASTERID
+import json, os, sys
 password = open('/home/dotcloud/password').read().strip()
-sshhost, sshport = re.findall('ssh://dotcloud@(.*):(.*)', masterinfo)[0]
-sqlhost, sqlport = re.findall('tcp://(.*):(.*)', masterinfo)[0]
-sqlconn = 'host={sqlhost} port={sqlport} user=dotcloud password={password}'.format(**locals())
+environ = json.load(open('/home/dotcloud/environment.json'))
+masterid = sys.argv[1]
+slaveid = environ['DOTCLOUD_SERVICE_ID']
+servicename = environ['DOTCLOUD_SERVICE_NAME'].upper()
+sshhost = environ['DOTCLOUD_{0}_SSH_HOST_{1}'.format(servicename, masterid)]
+sshport = environ['DOTCLOUD_{0}_SSH_PORT_{1}'.format(servicename, masterid)]
+sqlhost = environ['DOTCLOUD_{0}_PGSQL_HOST_{1}'.format(servicename, masterid)]
+sqlport = environ['DOTCLOUD_{0}_PGSQL_PORT_{1}'.format(servicename, masterid)]
+sqlconn = ('host={sqlhost} port={sqlport} user=dotcloud password={password} '
+           'dbname=template1'.format(**locals()))
 with open('/home/dotcloud/.ssh/config','w') as f:
     f.write('''Host master
         HostName {sshhost}
@@ -14,7 +19,8 @@ with open('/home/dotcloud/.ssh/config','w') as f:
         StrictHostKeyChecking no
         '''.format(**locals()))
 os.system('''supervisorctl stop postgres''')
-os.system('''psql "{sqlconn}" -c "SELECT pg_start_backup('enslave')"'''.format(**locals()))
+os.system('''psql "{sqlconn}" -c "SELECT pg_start_backup('enslave{slaveid}')"'''
+          .format(**locals()))
 os.system('''rsync --delete -a master:/home/dotcloud/data/ /home/dotcloud/data/''')
 os.system('''psql "{sqlconn}" -c "SELECT pg_stop_backup()"'''.format(**locals()))
 with open('/home/dotcloud/data/recovery.conf','w') as f:
