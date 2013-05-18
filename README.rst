@@ -12,13 +12,14 @@ Basic Setup
 ::
 
    git clone git://github.com/jpetazzo/postgresql-on-dotcloud.git
-   dotcloud push myapp postgresql-on-dotcloud
+   dotcloud create myapp
+   dotcloud push
 
 The superuser will be ``dotcloud`` (not ``root`` nor ``postgres``).
 The password will be shown at the end of the build process. You can
 also retrieve it by running::
 
-   dotcloud run myapp.db cat password
+   dotcloud run db cat password
 
 
 Master/Slave Setup
@@ -27,8 +28,8 @@ Master/Slave Setup
 By default, this recipe deploys a single PostgreSQL master.
 To provision a slave, you need to do this::
 
-   dotcloud scale myapp db=2
-   dotcloud info myapp.db.0 | dotcloud run myapp.db.1 /home/dotcloud/enslave.py
+   dotcloud scale db=2
+   dotcloud info db.0 | dotcloud run db.1 /home/dotcloud/enslave.py
 
 This last line will make myapp.db.1 a slave of myapp.db.0.
 The ``enslave.py`` script will read the ``dotcloud info`` blurb on ``stdin``,
@@ -44,8 +45,8 @@ Failover
 
 The failover is not automatic. You must do this::
 
-   dotcloud run myapp.db.1 rm /home/dotcloud/data/recovery.conf
-   dotcloud run myapp.db.1 supervisorctl restart postgres
+   dotcloud run db.1 rm /home/dotcloud/data/recovery.conf
+   dotcloud run db.1 supervisorctl restart postgres
 
 And then update your app configuration to point to the promoted slave
 instead of the master. You can rerun the "enslave" procedure described
