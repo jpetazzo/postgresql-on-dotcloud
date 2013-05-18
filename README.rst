@@ -21,6 +21,11 @@ also retrieve it by running::
 
    dotcloud run db cat password
 
+You can then inject that password in your dotCloud environment, by
+running the following command::
+
+   dotcloud env set POSTGRESQL_PASSWORD=$(dotcloud run db.0 cat password)
+
 
 Change PostgreSQL Version
 -------------------------
@@ -39,10 +44,10 @@ By default, this recipe deploys a single PostgreSQL master.
 To provision a slave, you need to do this::
 
    dotcloud scale db=2
-   dotcloud run db.1 /home/dotcloud/enslave.py 0
+   dotcloud run db.1 enslave 0
 
 This last line will make ``db.1`` a slave of ``db.0``.
-The first argument to the ``enslave.py`` script is the instance number of the
+The first argument to the ``enslave`` script is the instance number of the
 master. The script will retrieve the SSH and SQL connection parameters from
 the dotCloud environment, stop the slave ``postgres`` process,
 start a backup process on the master, transfer the ``PGDATA`` directory from

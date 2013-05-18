@@ -9,7 +9,8 @@ echo "Requested PostgreSQL version: $VERSION."
 CODEDIR=$PWD
 BUILDDIR="$(dirname "$0")"
 cp $BUILDDIR/run.postgres $HOME
-cp $BUILDDIR/enslave.py $HOME
+mkdir -p $HOME/bin
+cp $BUILDDIR/enslave $HOME/bin
 [ -d $HOME/postgresql-$VERSION ] || {
 	curl http://ftp.postgresql.org/pub/source/v$VERSION/postgresql-$VERSION.tar.gz | tar -zxf-
 	cd postgresql-$VERSION
