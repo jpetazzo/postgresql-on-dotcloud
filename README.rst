@@ -22,6 +22,16 @@ also retrieve it by running::
    dotcloud run db cat password
 
 
+Change PostgreSQL Version
+-------------------------
+
+The version of PostgreSQL is specified in the ``dotcloud.yml`` file.
+You can change it at any time, and repush. The requested version will
+be downloaded and compiled. Previous builds are kept, so rolling back
+to an old version (which was already installed before) won't require
+a full rebuild.
+
+
 Master/Slave Setup
 ------------------
 

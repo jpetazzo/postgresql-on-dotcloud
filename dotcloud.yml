@@ -5,4 +5,4 @@ db:
     postgres: ~/run.postgres
   ports:
     pgsql: tcp
-  
+  version: 9.2.4
